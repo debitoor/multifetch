@@ -1,0 +1,3 @@
+node_modules
+patches/*/node_modules
+coverage
