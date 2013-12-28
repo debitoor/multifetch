@@ -123,8 +123,9 @@ module.exports = create;
 
 if(require.main === module) {
 	var PORT = 8080;
+	var multifetch = require('../source/index');
 
-	create().listen(PORT, function() {
+	create().get('/api/multifetch', multifetch()).listen(PORT, function() {
 		console.log('Server listening on port ' + PORT);
 	});
 }
