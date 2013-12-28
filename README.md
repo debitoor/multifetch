@@ -92,4 +92,4 @@ app.get('/api/multifetch', multifetch(function(serverRequset, internalRequest, n
 If `request.body` is available and is a JSON object, resources will also be included from there (body object with resource names as keys, and paths as values). This
 can de bone by using a `post` route with the `bodyParse` middleware.
 
-Non JSON resources, where `content-type` doesn't contain `json`, are returned as strings.
+Requesting non JSON resources, where `content-type` doesn't contain `json`, returns `null` as body.

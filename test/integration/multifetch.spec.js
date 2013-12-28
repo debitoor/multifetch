@@ -383,8 +383,7 @@ describe('multifetch', function() {
 		it('should have string as body', function() {
 			chai.expect(body)
 				.to.have.property('root')
-				.to.have.property('body')
-				.to.be.a('string');
+				.to.have.property('body', null);
 		});
 	});
 

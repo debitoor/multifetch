@@ -4,7 +4,7 @@ var pump = require('pump');
 var extend = require('xtend');
 
 var JsonStream = require('./json');
-var StringifyStream = require('./stringify');
+var NullifyStream = require('./nullify');
 var http = require('./http');
 
 var noopCallback = function(serverRequest, internalRequest, callback) {
@@ -44,9 +44,9 @@ var fetch = function(app, messages) {
 	var response = messages.response;
 
 	var json = new JsonStream();
-	var stringify = new StringifyStream(response);
+	var nullify = new NullifyStream(response);
 
-	pump(response.socket.input, stringify, json.createObjectStream('body'), function(err) {
+	pump(response.socket.input, nullify, json.createObjectStream('body'), function(err) {
 		if(err) {
 			return json.destroy();
 		}
