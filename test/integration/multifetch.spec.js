@@ -377,13 +377,14 @@ describe('multifetch', function() {
 		});
 
 		it('should be failed response', function() {
-			chai.expect(body).to.have.property('_error', true);
+			chai.expect(body).to.have.property('_error', false);
 		});
 
-		it('should have null as body', function() {
+		it('should have string as body', function() {
 			chai.expect(body)
 				.to.have.property('root')
-				.to.have.property('body', null);
+				.to.have.property('body')
+				.to.be.a('string');
 		});
 	});
 

@@ -1,42 +1,11 @@
 var url = require('url');
-var util = require('util');
-var stream = require('stream');
 
 var pump = require('pump');
 var extend = require('xtend');
 
 var JsonStream = require('./json');
+var StringifyStream = require('./stringify');
 var http = require('./http');
-
-var Sink = function(response) {
-	stream.Transform.call(this);
-
-	this._response = response;
-	this._started = false;
-	this._sink = false;
-};
-
-util.inherits(Sink, stream.Transform);
-
-Sink.prototype._transform = function(data, encoding, callback) {
-	if(this._sink) {
-		return callback();
-	}
-	if(!this._started && !this.isJson()) {
-		this._started = true;
-		this._sink = true;
-
-		return callback(null, 'null');
-	}
-
-	this._started = true;
-	callback(null, data);
-};
-
-Sink.prototype.isJson = function() {
-	var type = this._response.getHeader('Content-Type') || '';
-	return (/(text|application)\/json/).test(type);
-};
 
 var noopCallback = function(serverRequest, internalRequest, callback) {
 	callback();
@@ -55,7 +24,7 @@ var createMessages = function(request, url) {
 	});
 };
 
-var resources = function(request, ignore) {
+var getResources = function(request, ignore) {
 	var body = (typeof request.body === 'object') ? request.body : {};
 	var query = extend({}, body, request.query);
 
@@ -75,9 +44,9 @@ var fetch = function(app, messages) {
 	var response = messages.response;
 
 	var json = new JsonStream();
-	var sink = new Sink(response);
+	var stringify = new StringifyStream(response);
 
-	pump(response.socket.input, sink, json.createObjectStream('body'), function(err) {
+	pump(response.socket.input, stringify, json.createObjectStream('body'), function(err) {
 		if(err) {
 			return json.destroy();
 		}
@@ -94,7 +63,7 @@ var fetch = function(app, messages) {
 	});
 
 	json.hasError = function() {
-		return !(/2\d\d/).test(response.statusCode) || !sink.isJson();
+		return !(/2\d\d/).test(response.statusCode);
 	};
 
 	return json;
@@ -111,7 +80,7 @@ var create = function(ignore, callback) {
 
 	return function(request, response, next) {
 		var app = request.app;
-		var query = resources(request, ignore);
+		var query = getResources(request, ignore);
 		var keys = Object.keys(query);
 
 		var json = new JsonStream();

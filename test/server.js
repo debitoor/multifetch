@@ -22,6 +22,15 @@ var json = function(request, response, next) {
 	next();
 };
 
+var text = function(request, response, next) {
+	response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+	next();
+};
+
+var root = function(name) {
+	return path.join(__dirname, '..', name);
+};
+
 var create = function() {
 	var app = express();
 
@@ -37,9 +46,12 @@ var create = function() {
 		next();
 	});
 
-	app.get('/', function(request, response) {
-		response.setHeader('Content-Type', 'text/plain; charset=utf-8');
-		response.send('Application root');
+	app.get('/', text, function(request, response) {
+		response.send('Application "root"');
+	});
+
+	app.get('/README.md', text, function(request, response) {
+		fs.createReadStream(root('README.md')).pipe(response);
 	});
 
 	app.get('/package', function(request, response) {
@@ -47,7 +59,7 @@ var create = function() {
 	});
 
 	app.get('/api', json, function(request, response) {
-		fs.readFile(path.join(__dirname, '..', 'package.json'), function(err, data) {
+		fs.readFile(root('package.json'), function(err, data) {
 			if(err) {
 				return response.json({ message: err.message });
 			}
