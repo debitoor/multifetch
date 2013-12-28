@@ -1,7 +1,3 @@
-// TODO:
-// return more data for each resource
-// { user: { status: 200, body: { ... } }, album: { ... } }
-
 var url = require('url');
 var util = require('util');
 var stream = require('stream');
@@ -74,6 +70,36 @@ var resources = function(request, ignore) {
 	}, {});
 };
 
+var fetch = function(app, messages) {
+	var request = messages.request;
+	var response = messages.response;
+
+	var json = new JsonStream();
+	var sink = new Sink(response);
+
+	pump(response.socket.input, sink, json.createObjectStream('body'), function(err) {
+		if(err) {
+			return json.destroy();
+		}
+
+		json.writeObject('statusCode', response.statusCode);
+		json.writeObject('headers', response._headers);
+		json.end();
+	});
+
+	setImmediate(function() {
+		app(request, response, function(err) {
+			json.destroy();
+		});
+	});
+
+	json.hasError = function() {
+		return !(/2\d\d/).test(response.statusCode) || !sink.isJson();
+	};
+
+	return json;
+};
+
 var create = function(ignore, callback) {
 	if(!callback && typeof ignore === 'function') {
 		callback = ignore;
@@ -89,9 +115,7 @@ var create = function(ignore, callback) {
 		var keys = Object.keys(query);
 
 		var json = new JsonStream();
-
-		var status = 'success';
-		var errs = [];
+		var error = false;
 
 		response.setHeader('Content-Type', 'application/json');
 
@@ -101,33 +125,28 @@ var create = function(ignore, callback) {
 			var key = keys.pop();
 
 			if(!key) {
-				json.writeObject('_status', status);
-				json.writeObject('_errors', errs);
+				json.writeObject('_error', error);
 				return json.end();
 			}
 
 			var messages = createMessages(request, query[key]);
-			var sink = new Sink(messages.response);
 
-			var write = function(err) {
-				if(err) {
+			var write = function(prevent) {
+				if(prevent) {
 					return loop();
 				}
 
-				pump(messages.response.socket.input, sink, json.createObjectStream(key), function(err) {
+				var resource = fetch(app, messages);
+
+				pump(resource, json.createObjectStream(key), function(err) {
 					if(err) {
 						return json.destroy();
 					}
-					if(!/2\d\d/.test(messages.response.statusCode) || !sink.isJson()) {
-						status = 'error';
-						errs.push(key);
+					if(resource.hasError()) {
+						error = true;
 					}
 
 					loop();
-				});
-
-				app(messages.request, messages.response, function(err) {
-					response.end();
 				});
 			};
 

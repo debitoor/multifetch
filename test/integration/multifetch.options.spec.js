@@ -28,10 +28,7 @@ describe('multifetch.options', function() {
 		});
 
 		it('should be successful response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
 		});
 
 		it('should ignore token query parameter', function() {
@@ -39,7 +36,9 @@ describe('multifetch.options', function() {
 		});
 
 		it('should contain user', function() {
-			chai.expect(body).to.have.property('user');
+			chai.expect(body)
+				.to.have.property('user')
+				.to.have.property('statusCode', 200);
 		});
 	});
 
@@ -78,10 +77,7 @@ describe('multifetch.options', function() {
 		});
 
 		it('should be successful response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
 		});
 
 		it('should not have users', function() {
@@ -89,7 +85,9 @@ describe('multifetch.options', function() {
 		});
 
 		it('should contain album', function() {
-			chai.expect(body).to.have.property('album');
+			chai.expect(body)
+				.to.have.property('album')
+				.to.have.property('statusCode', 200);
 		});
 	});
 
@@ -117,21 +115,21 @@ describe('multifetch.options', function() {
 		});
 
 		it('should be successful response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
 		});
 
 		it('should contain user_1', function() {
 			chai.expect(body)
 				.to.have.property('user')
-				.to.deep.equal({
-					name: 'user_1',
-					associates: [],
-					location: {
-						city: 'Copenhagen',
-						address: 'Wildersgade'
+				.to.contain.subset({
+					statusCode: 200,
+					body: {
+						name: 'user_1',
+						associates: [],
+						location: {
+							city: 'Copenhagen',
+							address: 'Wildersgade'
+						}
 					}
 				});
 		});

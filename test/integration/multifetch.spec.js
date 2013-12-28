@@ -28,10 +28,7 @@ describe('multifetch', function() {
 		});
 
 		it('should be an empty response', function() {
-			chai.expect(body).to.deep.equal({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.deep.equal({ _error: false });
 		});
 	});
 
@@ -48,21 +45,28 @@ describe('multifetch', function() {
 		});
 
 		it('should be successful response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
+		});
+
+		it('should contain headers', function() {
+			chai.expect(body)
+				.to.have.property('user')
+				.to.have.property('headers')
+				.to.have.property('content-type', 'application/json');
 		});
 
 		it('should contain user_1', function() {
 			chai.expect(body)
 				.to.have.property('user')
-				.to.deep.equal({
-					name: 'user_1',
-					associates: [],
-					location: {
-						city: 'Copenhagen',
-						address: 'Wildersgade'
+				.to.contain.subset({
+					statusCode: 200,
+					body: {
+						name: 'user_1',
+						associates: [],
+						location: {
+							city: 'Copenhagen',
+							address: 'Wildersgade'
+						}
 					}
 				});
 		});
@@ -81,20 +85,24 @@ describe('multifetch', function() {
 		});
 
 		it('should be successful response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
+		});
+
+		it('should contain users with status ok', function() {
+			chai.expect(body)
+				.to.have.property('users')
+				.to.have.property('statusCode', 200);
 		});
 
 		it('should contain users array', function() {
 			chai.expect(body)
 				.to.have.property('users')
+				.to.have.property('body')
 				.to.be.instanceof(Array);
 		});
 
 		it('should contain all users in array', function() {
-			chai.expect(body.users.length).to.equal(3);
+			chai.expect(body.users.body.length).to.equal(3);
 		});
 	});
 
@@ -111,20 +119,24 @@ describe('multifetch', function() {
 		});
 
 		it('should be successful response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
+		});
+
+		it('should contain albums with status ok', function() {
+			chai.expect(body)
+				.to.have.property('albums')
+				.to.have.property('statusCode', 200);
 		});
 
 		it('should contain albums array', function() {
 			chai.expect(body)
 				.to.have.property('albums')
+				.to.have.property('body')
 				.to.be.instanceof(Array);
 		});
 
 		it('should contain all albums for user', function() {
-			chai.expect(body.albums.length).to.equal(5);
+			chai.expect(body.albums.body.length).to.equal(5);
 		});
 	});
 
@@ -145,31 +157,38 @@ describe('multifetch', function() {
 		});
 
 		it('should be successful response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
+		});
+
+		it('should contain albums with status ok', function() {
+			chai.expect(body)
+				.to.have.property('albums')
+				.to.have.property('statusCode', 200);
 		});
 
 		it('should contain albums array', function() {
 			chai.expect(body)
 				.to.have.property('albums')
+				.to.have.property('body')
 				.to.be.instanceof(Array);
 		});
 
 		it('should contain all albums for user', function() {
-			chai.expect(body.albums.length).to.equal(5);
+			chai.expect(body.albums.body.length).to.equal(5);
 		});
 
 		it('should contain user', function() {
 			chai.expect(body)
 				.to.have.property('user')
-				.to.deep.equal({
-					name: 'user_2',
-					associates: ['user_1', 'user_3'],
-					location: {
-						city: 'Aarhus',
-						address: 'Niels Borhs Vej'
+				.to.contain.subset({
+					statusCode: 200,
+					body: {
+						name: 'user_2',
+						associates: ['user_1', 'user_3'],
+						location: {
+							city: 'Aarhus',
+							address: 'Niels Borhs Vej'
+						}
 					}
 				});
 		});
@@ -177,14 +196,17 @@ describe('multifetch', function() {
 		it('should contain album for user', function() {
 			chai.expect(body)
 				.to.have.property('album')
-				.to.deep.equal({
-					owner: 'user_2',
-					name: 'album_1',
-					date: '2013-12-01',
-					files: [{
-						name: 'file_1',
-						size: 512
-					}]
+				.to.contain.subset({
+					statusCode: 200,
+					body: {
+						owner: 'user_2',
+						name: 'album_1',
+						date: '2013-12-01',
+						files: [{
+							name: 'file_1',
+							size: 512
+						}]
+					}
 				});
 		});
 	});
@@ -202,15 +224,19 @@ describe('multifetch', function() {
 		});
 
 		it('should be failed response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'error',
-				_errors: ['user']
-			});
+			chai.expect(body).to.have.property('_error', true);
+		});
+
+		it('should contain user with status not found', function() {
+			chai.expect(body)
+				.to.have.property('user')
+				.to.have.property('statusCode', 404);
 		});
 
 		it('should contain user error', function() {
 			chai.expect(body)
 				.to.have.property('user')
+				.to.have.property('body')
 				.to.have.property('message');
 		});
 	});
@@ -247,25 +273,25 @@ describe('multifetch', function() {
 		});
 
 		it('should be successful response', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
 		});
 
 		it('should contain single user in array', function() {
 			chai.expect(body)
 				.to.have.property('user')
-				.to.deep.equal([
-					{
-						name: 'user_2',
-						associates: ['user_1', 'user_3'],
-						location: {
-							city: 'Aarhus',
-							address: 'Niels Borhs Vej'
+				.to.contain.subset({
+					statusCode: 200,
+					body: [
+						{
+							name: 'user_2',
+							associates: ['user_1', 'user_3'],
+							location: {
+								city: 'Aarhus',
+								address: 'Niels Borhs Vej'
+							}
 						}
-					}
-				]);
+					]
+				});
 		});
 	});
 
@@ -285,23 +311,23 @@ describe('multifetch', function() {
 		});
 
 		it('should ignore multifetch resource', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
 		});
 
 		it('should contain user album', function() {
 			chai.expect(body)
 				.to.have.property('album')
-				.to.deep.equal({
-					owner: 'user_3',
-					name: 'album_3',
-					date: '2013-11-29',
-					files: [{
-						name: 'file_2',
-						size: 1024
-					}]
+				.to.contain.subset({
+					statusCode: 200,
+					body: {
+						owner: 'user_3',
+						name: 'album_3',
+						date: '2013-11-29',
+						files: [{
+							name: 'file_2',
+							size: 1024
+						}]
+					}
 				});
 		});
 	});
@@ -322,20 +348,19 @@ describe('multifetch', function() {
 		});
 
 		it('should ignore multifetch resource', function() {
-			chai.expect(body).to.contain.subset({
-				_status: 'success',
-				_errors: []
-			});
+			chai.expect(body).to.have.property('_error', false);
 		});
 
 		it('should contain user', function() {
 			chai.expect(body)
-				.to.have.property('user');
+				.to.have.property('user')
+				.to.have.property('statusCode', 200);
 		});
 
 		it('should contain api data', function() {
 			chai.expect(body)
-				.to.have.property('api');
+				.to.have.property('api')
+				.to.have.property('statusCode', 200);
 		});
 	});
 
@@ -352,12 +377,13 @@ describe('multifetch', function() {
 		});
 
 		it('should be failed response', function() {
+			chai.expect(body).to.have.property('_error', true);
+		});
+
+		it('should have null as body', function() {
 			chai.expect(body)
-				.to.deep.equal({
-					root: null,
-					_errors: ['root'],
-					_status: 'error'
-				});
+				.to.have.property('root')
+				.to.have.property('body', null);
 		});
 	});
 
@@ -374,12 +400,13 @@ describe('multifetch', function() {
 		});
 
 		it('should be failed response', function() {
+			chai.expect(body).to.have.property('_error', true);
+		});
+
+		it('should have api with status found', function() {
 			chai.expect(body)
-				.to.deep.equal({
-					api: null,
-					_errors: ['api'],
-					_status: 'error'
-				});
+				.to.have.property('api')
+				.to.have.property('statusCode', 302);
 		});
 	});
 });
