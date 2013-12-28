@@ -1,7 +1,7 @@
 {
   "name": "multifetch",
   "version": "0.0.1",
-  "description": "Express middleware for performing internal requests",
+  "description": "Express middleware for performing internal batch requests",
   "main": "source/index.js",
   "scripts": {
     "test": "node ./test.js"
