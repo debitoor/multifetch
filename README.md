@@ -31,6 +31,7 @@ app.listen(8080);
 Performing a GET request to `/api/multifetch?user=/api/user`, will return the user and some meta information. The query parameter should have a resource name as key and the relative path as value. The path can have its own query, as long it's encoded correctly.
 
 ```javascript
+// Response JSON object
 {
 	user: {
 		statusCode: 200,							// Response code returned by the user route
@@ -47,7 +48,13 @@ Performing a GET request to `/api/multifetch?user=/api/user`, will return the us
 }
 ```
 
-This way we can fetch multiple resources, by adding them to the query. If we had more routes defined, it would be possible to do `/api/multifetch?user=/api/user&albums=/api/users/user_1/albums&files=/api/files`. And the response will contain all the resources as described above.
+This way we can fetch multiple resources, by adding them to the query. If we had more routes defined, it would be possible to do.
+
+```javascript
+GET /api/multifetch?user=/api/user&albums=/api/users/user_1/albums&files=/api/files
+```
+
+And the response will contain all the resources as described above.
 
 ```javascript
 {
@@ -70,7 +77,7 @@ This way we can fetch multiple resources, by adding them to the query. If we had
 }
 ```
 
-This doesn't perform any additional HTTP requests, instead it uses express' internal routing to get the resources and send them back to client. The JSON is streamed to client one requests at the time.
+We don't perform any additional HTTP requests, instead express' internal routing is used to get the resources and send them back to client. The JSON is streamed to client one requests at the time.
 
 It is also possible to configure `multifetch` to ignore some of the query parameters, or call a provided callback function before performing any internal routing, which makes it possible to set any required headers on the internal request, e.g. api access tokens (the `cookie` header is set by default).
 
@@ -78,7 +85,9 @@ It is also possible to configure `multifetch` to ignore some of the query parame
 // Ignore access_token and token in the query
 app.get('/api/multifetch', multifetch(['access_token', 'token']));
 
-// Callback function run before each internal request
+// Callback function run before each internal request.
+// The serverRequest argument, is the original request to multifetch,
+// while internalRequest is the fake request generated to get the actual resource.
 app.get('/api/multifetch', multifetch(function(serverRequset, internalRequest, next) {
 	if(serverRequest.hasAccess) {
 		// Calling next with a truthy value, skips this internal request.
