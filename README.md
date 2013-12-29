@@ -50,9 +50,7 @@ Performing a GET request to `/api/multifetch?user=/api/user`, will return the us
 
 This way we can fetch multiple resources, by adding them to the query. If we had more routes defined, it would be possible to do.
 
-```javascript
-GET /api/multifetch?user=/api/user&albums=/api/users/user_1/albums&files=/api/files
-```
+	GET /api/multifetch?user=/api/user&albums=/api/users/user_1/albums&files=/api/files
 
 And the response will contain all the resources as described above.
 
