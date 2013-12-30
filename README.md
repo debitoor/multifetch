@@ -81,7 +81,7 @@ It is also possible to configure `multifetch` to ignore some of the query parame
 
 ```javascript
 // Ignore access_token and token in the query
-app.get('/api/multifetch', multifetch(['access_token', 'token']));
+app.get('/api/multifetch', multifetch({ ignore: ['access_token', 'token'] }));
 
 // Callback function run before each internal request.
 // The serverRequest argument, is the original request to multifetch,
@@ -102,3 +102,21 @@ If `request.body` is available and is a JSON object, resources will also be incl
 can de bone by using a `post` route with the `bodyParse` middleware.
 
 Requesting non JSON resources, where `content-type` doesn't contain `json`, returns `null` as body.
+
+Passing `headers: false` as an option, excludes `statusCode` and `headers` from the response, only the resource content is returned (the `_error` property is still available).
+
+```javascript
+app.get('/api/multifetch', multifetch({ headers: false }));
+```
+
+Response with content only.
+
+```javascript
+{
+	user: {
+		name: 'user_1',
+		associates: ['user_2', 'user_3']
+	},
+	_error: false
+}
+```

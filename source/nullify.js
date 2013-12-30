@@ -16,6 +16,7 @@ var NullifyStream = function(response) {
 	this._response = response;
 	this._started = false;
 	this._nullify = false;
+	this._destroyed = false;
 };
 
 util.inherits(NullifyStream, stream.Transform);
@@ -33,6 +34,15 @@ NullifyStream.prototype._transform = function(data, encoding, callback) {
 
 	this._started = true;
 	callback(null, data);
+};
+
+NullifyStream.prototype.destroy = function() {
+	if(this._destroyed) {
+		return;
+	}
+
+	this._destroyed = true;
+	this.emit('close');
 };
 
 module.exports = NullifyStream;

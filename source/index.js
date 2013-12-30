@@ -39,10 +39,7 @@ var getResources = function(request, ignore) {
 	}, {});
 };
 
-var fetch = function(app, messages) {
-	var request = messages.request;
-	var response = messages.response;
-
+var fetchWithHeaders = function(request, response) {
 	var json = new JsonStream();
 	var nullify = new NullifyStream(response);
 
@@ -56,26 +53,34 @@ var fetch = function(app, messages) {
 		json.end();
 	});
 
-	setImmediate(function() {
-		app(request, response, function(err) {
-			json.destroy();
-		});
-	});
-
-	json.hasError = function() {
-		return !(/2\d\d/).test(response.statusCode);
-	};
-
 	return json;
 };
 
-var create = function(ignore, callback) {
-	if(!callback && typeof ignore === 'function') {
-		callback = ignore;
-		ignore = [];
+var fetchBare = function(request, response) {
+	var nullify = new NullifyStream(response);
+
+	pump(response.socket.input, nullify, function(err) {
+		if(err) {
+			return nullify.destroy();
+		}
+	});
+
+	return nullify;
+};
+
+var create = function(options, callback) {
+	if(!callback && typeof options === 'function') {
+		callback = options;
+		options = {};
 	}
 
-	ignore = ignore || [];
+	options = options || {};
+
+	var ignore = options.ignore || [];
+	var headers = options.headers !== undefined ? options.headers : true;
+
+	var fetch = headers ? fetchWithHeaders : fetchBare;
+
 	callback = callback || noopCallback;
 
 	return function(request, response, next) {
@@ -105,17 +110,21 @@ var create = function(ignore, callback) {
 					return loop();
 				}
 
-				var resource = fetch(app, messages);
+				var resource = fetch(messages.request, messages.response);
 
 				pump(resource, json.createObjectStream(key), function(err) {
 					if(err) {
 						return json.destroy();
 					}
-					if(resource.hasError()) {
+					if(!(/2\d\d/).test(messages.response.statusCode)) {
 						error = true;
 					}
 
 					loop();
+				});
+
+				app(messages.request, messages.response, function(err) {
+					json.destroy();
 				});
 			};
 

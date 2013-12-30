@@ -8,7 +8,7 @@ describe('multifetch.options', function() {
 		before(function(done) {
 			server = helper.server();
 
-			server.get('/api/multifetch', multifetch(['access_token', 'token']));
+			server.get('/api/multifetch', multifetch({ ignore: ['access_token', 'token'] }));
 			server = server.listen(helper.port, done);
 		});
 
@@ -88,6 +88,110 @@ describe('multifetch.options', function() {
 			chai.expect(body)
 				.to.have.property('album')
 				.to.have.property('statusCode', 200);
+		});
+	});
+
+	describe('headers', function() {
+		before(function(done) {
+			server = helper.server();
+
+			server.get('/api/multifetch', multifetch({ headers: false }));
+			server = server.listen(helper.port, done);
+		});
+
+		after(function(done) {
+			server.close(done);
+		});
+
+		describe('fetch multiple resources', function() {
+			before(function(done) {
+				request.get({
+					url: helper.url('/api/multifetch'),
+					qs: {
+						user: '/api/users/user_1',
+						album: '/api/users/user_1/albums/album_1'
+					},
+					json: true
+				}, function(err, _, result) {
+					body = result;
+					done(err);
+				});
+			});
+
+			it('should be successful response', function() {
+				chai.expect(body).to.have.property('_error', false);
+			});
+
+			it('should contain user_1', function() {
+				chai.expect(body)
+					.to.have.property('user')
+					.to.deep.equal({
+						name: 'user_1',
+						associates: [],
+						location: {
+							city: 'Copenhagen',
+							address: 'Wildersgade'
+						}
+					});
+			});
+
+			it('should contain album_1', function() {
+				chai.expect(body)
+					.to.have.property('album')
+					.to.deep.equal({
+						owner: 'user_1',
+						name: 'album_1',
+						date: '2013-12-12',
+						files: [{
+							name: 'file_1',
+							size: 128
+						}, {
+							name: 'file_2',
+							size: 512
+						}]
+					});
+			});
+		});
+
+		describe('hang up on bad request', function() {
+			var err;
+
+			before(function(done) {
+				request.get({
+					url: helper.url('/api/multifetch'),
+					qs: { user: '/api/not_found' },
+					json: true
+				}, function(result) {
+					err = result;
+					done();
+				});
+			});
+
+			it('should emit error', function() {
+				chai.expect(err).to.defined;
+			});
+		});
+
+		describe('get non json resource', function() {
+			before(function(done) {
+				request.get({
+					url: helper.url('/api/multifetch'),
+					qs: { root: '/' },
+					json: true
+				}, function(err, _, result) {
+					body = result;
+					done(err);
+				});
+			});
+
+			it('should be failed response', function() {
+				chai.expect(body).to.have.property('_error', false);
+			});
+
+			it('should have string as body', function() {
+				chai.expect(body)
+					.to.have.property('root', null);
+			});
 		});
 	});
 
