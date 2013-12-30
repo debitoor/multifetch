@@ -3,7 +3,7 @@ var events = require('events');
 var http = require('http');
 var util = require('util');
 
-var extend = require('xtend');
+var extend = require('extend');
 
 var noop = function() {};
 

@@ -1,7 +1,7 @@
 var url = require('url');
 
 var pump = require('pump');
-var extend = require('xtend');
+var extend = require('extend');
 
 var JsonStream = require('./json');
 var NullifyStream = require('./nullify');
