@@ -3,6 +3,8 @@ multifetch [![Build Status](https://travis-ci.org/e-conomic/multifetch.png?branc
 
 Express middleware for performing internal batch GET requests. It allows the client to send a single HTTP request, which in turn can fetch multiple JSON resources in the app, without performing any further requests.
 
+	npm install multifetch
+
 Developed and tested with `node 0.10`.
 
 Usage
