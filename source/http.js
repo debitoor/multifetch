@@ -153,6 +153,11 @@ var createResponse = function(serverRequest) {
 		return false;
 	});
 
+	socket.on('drain', function() {
+		if(socket._httpMessage) {
+			socket._httpMessage.emit('drain');
+		}
+	});
 	response.on('finish', function() {
 		socket.end();
 	});

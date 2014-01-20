@@ -5,6 +5,10 @@ var express = require('express');
 var users = require('./fixtures/users');
 var albums = require('./fixtures/albums');
 
+var root = function(name) {
+	return path.join(__dirname, '..', name);
+};
+
 var findByName = function(models, name) {
 	return models.filter(function(m) {
 		return m.name === name;
@@ -17,6 +21,16 @@ var findAllByOwner = function(models, owner) {
 	});
 };
 
+var getBlob = function() {
+	var blob = new Buffer(1024 * 1024);
+
+	blob.fill('h');
+	blob.write('"', 0, 1);
+	blob.write('"', blob.length - 1, 1);
+
+	return blob;
+};
+
 var json = function(request, response, next) {
 	response.setHeader('Content-Type', 'application/json');
 	next();
@@ -27,8 +41,16 @@ var text = function(request, response, next) {
 	next();
 };
 
-var root = function(name) {
-	return path.join(__dirname, '..', name);
+var album = function(request, response, next) {
+	var userAlbums = findAllByOwner(albums, request.params.user);
+	var album = findByName(userAlbums, request.params.album);
+
+	if(!album || album.owner !== request.params.user) {
+		return response.notFound();
+	}
+
+	request.album = album;
+	next();
 };
 
 var create = function() {
@@ -117,15 +139,33 @@ var create = function() {
 		response.end();
 	});
 
-	app.get('/api/users/:user/albums/:album', json, function(request, response) {
-		var userAlbums = findAllByOwner(albums, request.params.user);
-		var album = findByName(userAlbums, request.params.album);
+	app.get('/api/users/:user/albums/:album', json, album, function(request, response) {
+		response.json(request.album);
+	});
 
-		if(!album || album.owner !== request.params.user) {
-			return response.notFound();
-		}
+	app.get('/api/users/:user/albums/:album/blob', json, album, function(request, response) {
+		response.write(getBlob());
+		response.end();
+	});
 
-		response.json(album);
+	app.get('/api/users/:user/albums/:album/stream', json, album, function(request, response) {
+		var blob = getBlob();
+		var offset = 0;
+
+		(function loop() {
+			if(offset >= blob.length) {
+				return response.end();
+			}
+
+			var part = blob.slice(offset, offset + Math.pow(2, 17));
+			offset += part.length;
+
+			if(response.write(part) !== false) {
+				loop();
+			} else {
+				response.once('drain', loop);
+			}
+		}());
 	});
 
 	return app;

@@ -409,4 +409,74 @@ describe('multifetch', function() {
 				.to.have.property('statusCode', 302);
 		});
 	});
+
+	describe('get big data', function() {
+		before(function(done) {
+			request.get({
+				url: helper.url('/api/multifetch'),
+				qs: { blob: '/api/users/user_3/albums/album_3/blob' },
+				json: true
+			}, function(err, _, result) {
+				body = result;
+				done(err);
+			});
+		});
+
+		it('should be successful response', function() {
+			chai.expect(body).to.have.property('_error', false);
+		});
+
+		it('should contain blob with status ok', function() {
+			chai.expect(body)
+				.to.have.property('blob')
+				.to.have.property('statusCode', 200);
+		});
+
+		it('should contain blob of type string', function() {
+			chai.expect(body)
+				.to.have.property('blob')
+				.to.have.property('body')
+				.to.be.a('string');
+		});
+
+		it('should contain blob of 1MB size', function() {
+			// Subtract two (2) bytes representing the quotes
+			chai.expect(body.blob.body.length).to.equal(1024 * 1024 - 2);
+		});
+	});
+
+	describe('stream big data', function() {
+		before(function(done) {
+			request.get({
+				url: helper.url('/api/multifetch'),
+				qs: { blob: '/api/users/user_3/albums/album_3/stream' },
+				json: true
+			}, function(err, _, result) {
+				body = result;
+				done(err);
+			});
+		});
+
+		it('should be successful response', function() {
+			chai.expect(body).to.have.property('_error', false);
+		});
+
+		it('should contain blob with status ok', function() {
+			chai.expect(body)
+				.to.have.property('blob')
+				.to.have.property('statusCode', 200);
+		});
+
+		it('should contain blob of type string', function() {
+			chai.expect(body)
+				.to.have.property('blob')
+				.to.have.property('body')
+				.to.be.a('string');
+		});
+
+		it('should contain blob of 1MB size', function() {
+			// Subtract two (2) bytes representing the quotes
+			chai.expect(body.blob.body.length).to.equal(1024 * 1024 - 2);
+		});
+	});
 });
