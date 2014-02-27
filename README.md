@@ -30,7 +30,7 @@ app.get('/api/user', function(request, response) {
 app.listen(8080);
 ```
 
-Performing a GET request to `/api/multifetch?user=/api/user`, will return the user and some meta information. The query parameter should have a resource name as key and the relative path as value. The path can have its own query, as long it's encoded correctly.
+Performing a GET request to `/api/multifetch?user=/api/user`, will return the user and some meta information. The query parameter should have a resource name as key and the relative path as value. The path can have its own query, as long it's encoded correctly. Furthermore the endpoint must return `application/json` or `text/json` (with or without character encoding) in the `content-type` header, or else the content will be ignored.
 
 ```javascript
 // Response JSON object
