@@ -122,3 +122,8 @@ Response with content only.
 	_error: false
 }
 ```
+
+License
+-------
+
+[MIT](http://opensource.org/licenses/MIT)

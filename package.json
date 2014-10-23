@@ -20,5 +20,13 @@
     "sinon-chai": ">=2.4.0",
     "mocha-jshint": ">=0.0.7",
     "once": ">=1.3.0"
-  }
+  },
+  "license": "MIT",
+  "keywords": [
+    "express",
+    "middleware",
+    "batch",
+    "multi",
+    "request"
+  ]
 }
