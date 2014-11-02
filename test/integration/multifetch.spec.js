@@ -365,6 +365,30 @@ describe('multifetch', function() {
 		});
 	});
 
+	describe('get proxied cookie', function() {
+		before(function(done) {
+			request.get({
+				url: helper.url('/api/multifetch'),
+				qs: { cookie: '/cookie' },
+				headers: { cookie: 'my_test_cookie' },
+				json: true
+			}, function(err, _, result) {
+				body = result;
+				done(err);
+			});
+		});
+
+		it('should be successful response', function() {
+			chai.expect(body).to.have.property('_error', false);
+		});
+
+		it('should contain proxied cookie', function() {
+			chai.expect(body)
+				.to.have.deep.property('cookie.body')
+				.to.eql({ cookie: 'my_test_cookie' });
+		});
+	});
+
 	describe('get non json resource', function() {
 		before(function(done) {
 			request.get({

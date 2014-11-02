@@ -8,8 +8,8 @@
     "test": "node ./test.js"
   },
   "dependencies": {
-    "pump": "~0.2.3",
-    "extend": "~1.2.1"
+    "pump": "~1.0.0",
+    "extend": "~2.0.0"
   },
   "devDependencies": {
     "request": "~2.30.0",

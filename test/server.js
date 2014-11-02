@@ -83,6 +83,10 @@ var create = function() {
 		response.redirect('/api');
 	});
 
+	app.get('/cookie', function(request, response) {
+		response.json({ cookie: request.headers.cookie });
+	});
+
 	app.get('/api', json, function(request, response) {
 		fs.readFile(root('package.json'), function(err, data) {
 			if(err) {
