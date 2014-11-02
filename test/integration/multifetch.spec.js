@@ -52,7 +52,8 @@ describe('multifetch', function() {
 			chai.expect(body)
 				.to.have.property('user')
 				.to.have.property('headers')
-				.to.have.property('content-type', 'application/json');
+				.to.have.property('content-type')
+				.to.match(/^application\/json/);
 		});
 
 		it('should contain user_1', function() {

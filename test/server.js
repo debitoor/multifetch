@@ -2,6 +2,9 @@ var fs = require('fs');
 var path = require('path');
 
 var express = require('express');
+var methodOverride = require('method-override');
+var bodyParser = require('body-parser');
+
 var users = require('./fixtures/users');
 var albums = require('./fixtures/albums');
 
@@ -56,8 +59,8 @@ var album = function(request, response, next) {
 var create = function() {
 	var app = express();
 
-	app.use(express.json());
-	app.use(express.methodOverride());
+	app.use(bodyParser.json());
+	app.use(methodOverride());
 
 	app.use(function(request, response, next) {
 		response.notFound = function() {
