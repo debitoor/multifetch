@@ -5,7 +5,7 @@ Express middleware for performing internal batch GET requests. It allows the cli
 
 	npm install multifetch
 
-Developed and tested with `node 0.10`.
+Developed and tested with `node 0.10`. Versions above `1.0.0` of this module are tested with `express 4`, while previous versions used `express 3`.
 
 Usage
 -----
