@@ -1,6 +1,6 @@
 {
   "name": "multifetch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": "git@github.com:e-conomic/multifetch.git",
   "description": "Express middleware for performing internal batch requests",
   "main": "source/index.js",
