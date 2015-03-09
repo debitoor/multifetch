@@ -31,7 +31,7 @@ var getResources = function(request, ignore) {
 	var path = url.parse(request.url).pathname;
 
 	return Object.keys(query).reduce(function(acc, key) {
-		if(key !== path && ignore.indexOf(key) === -1) {
+		if(query[key] !== path && ignore.indexOf(key) === -1) {
 			acc[key] = query[key];
 		}
 
