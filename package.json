@@ -5,7 +5,7 @@
   "description": "Express middleware for performing internal batch requests",
   "main": "source/index.js",
   "scripts": {
-    "test": "node ./test.js"
+    "test": "mocha"
   },
   "dependencies": {
     "pump": "~1.0.0",
