@@ -123,6 +123,18 @@ Response with content only.
 }
 ```
 
+### Concurrency
+By default, `multifetch` will process each request sequentially, waiting until a request has been processed and fully piped out before it processes the next request.
+
+If the response to each of your requests is small but takes a long time to fetch (e.g. heavy database queries), `multifetch` supports concurrently processing requests.
+
+Passing `concurrency: N` as an option allows you to control the number of concurrent requests being processed at any one time:
+
+```javascript
+app.get('/api/multifetch', multifetch({concurrency: 5}));
+```
+In the above case, 5 requests would be routed through express concurrently, and the response of each is placed in a queue to be streamed out to the client sequentially.
+
 License
 -------
 
