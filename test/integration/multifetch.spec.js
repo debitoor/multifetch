@@ -311,8 +311,12 @@ describe('multifetch', function() {
 			});
 		});
 
-		it('should ignore multifetch resource', function() {
+		it('should be a successful response', function() {
 			chai.expect(body).to.have.property('_error', false);
+		});
+
+		it('should ignore multifetch resource', function() {
+			chai.expect(body).not.to.have.property('multifetch');
 		});
 
 		it('should contain user album', function() {
@@ -348,7 +352,7 @@ describe('multifetch', function() {
 			});
 		});
 
-		it('should ignore multifetch resource', function() {
+		it('should be a successful response', function() {
 			chai.expect(body).to.have.property('_error', false);
 		});
 
