@@ -238,4 +238,85 @@ describe('multifetch.options', function() {
 				});
 		});
 	});
+
+
+	describe('concurrent fetching', function() {
+
+		before(function(done) {
+			server = helper.server();
+
+			server.get('/api/multifetch', multifetch({ concurrency: 5 }));
+			server = server.listen(helper.port, done);
+		});
+
+		after(function(done) {
+			server.close(done);
+		});
+
+		describe('fetch multiple resources', function() {
+			before(function(done) {
+				request.get({
+					url: helper.url('/api/multifetch'),
+					qs: {
+						api: '/api',
+						user_1: '/api/users/user_1',
+						user_2: '/api/users/user_2',
+						user_3: '/api/users/user_3',
+						readme: '/README.md'
+					},
+					json: true
+				}, function(err, _, result) {
+					body = result;
+					done(err);
+				});
+			});
+
+			it('should be successful response', function() {
+				chai.expect(body).to.have.property('_error', false);
+			});
+
+			it('should fetch all resources', function() {
+				chai.expect(body)
+					.to.have.property('api')
+					.to.have.property('statusCode', 200);
+
+				chai.expect(body)
+					.to.have.property('user_1')
+					.to.have.property('statusCode', 200);
+
+				chai.expect(body)
+					.to.have.property('user_2')
+					.to.have.property('statusCode', 200);
+
+				chai.expect(body)
+					.to.have.property('user_3')
+					.to.have.property('statusCode', 200);
+
+				chai.expect(body)
+					.to.have.property('readme')
+					.to.have.property('statusCode', 200);
+			});
+		});
+
+		describe('hang up on bad request', function() {
+			var err;
+
+			before(function(done) {
+				request.get({
+					url: helper.url('/api/multifetch'),
+					qs: {
+						bad: '/api/not_found',
+					},
+					json: true
+				}, function(result) {
+					err = result;
+					done();
+				});
+			});
+
+			it('should emit an error', function() {
+				chai.expect(err).to.be.defined;
+			});
+		});
+	});
 });
