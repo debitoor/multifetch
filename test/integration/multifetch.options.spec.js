@@ -275,23 +275,31 @@ describe('multifetch.options', function() {
 				chai.expect(body).to.have.property('_error', false);
 			});
 
-			it('should fetch all resources', function() {
+			it('should fetch api resource', function() {
 				chai.expect(body)
 					.to.have.property('api')
 					.to.have.property('statusCode', 200);
+			});
 
+			it('should fetch user_1 resource', function() {
 				chai.expect(body)
 					.to.have.property('user_1')
 					.to.have.property('statusCode', 200);
+			});
 
+			it('should fetch user_2 resource', function() {
 				chai.expect(body)
 					.to.have.property('user_2')
 					.to.have.property('statusCode', 200);
+			});
 
+			it('should fetch user_3 resource', function() {
 				chai.expect(body)
 					.to.have.property('user_3')
 					.to.have.property('statusCode', 200);
+			});
 
+			it('should fetch user_4 resource', function() {
 				chai.expect(body)
 					.to.have.property('readme')
 					.to.have.property('statusCode', 200);
