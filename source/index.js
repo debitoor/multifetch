@@ -125,27 +125,25 @@ var create = function(options, prefetch) {
 		// stream into the resource queue.
 		var fetchResource = function(key, callback) {
 			var messages = createMessages(request, query[key]);
-			process.nextTick(function() {
-				prefetch(request, messages.request, function(prevent) {
-					if (prevent) return callback();
+			prefetch(request, messages.request, function(prevent) {
+				if (prevent) return callback();
 
-					var resource = fetch(messages.request, messages.response);
-					var task = {
-						resource: resource,
-						request: messages.request,
-						response: messages.response,
-						key: key
-					};
+				var resource = fetch(messages.request, messages.response);
+				var task = {
+					resource: resource,
+					request: messages.request,
+					response: messages.response,
+					key: key
+				};
 
-					app(messages.request, messages.response, function() {
-						resourceQueue.kill();
-						json.destroy();
-					});
-
-					// Callback is called once the stream for this resource has
-					// been fully piped out to the client.
-					resourceQueue.push(task, callback);
+				app(messages.request, messages.response, function() {
+					resourceQueue.kill();
+					json.destroy();
 				});
+
+				// Callback is called once the stream for this resource has
+				// been fully piped out to the client.
+				resourceQueue.push(task, callback);
 			});
 		};
 
