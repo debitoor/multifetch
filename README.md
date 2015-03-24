@@ -131,7 +131,7 @@ If the response to each of your requests is small but takes a long time to fetch
 Passing `concurrency: N` as an option allows you to control the number of concurrent requests being processed at any one time:
 
 ```javascript
-app.get('/api/multifetch', multifetch({concurrency: 5}));
+app.get('/api/multifetch', multifetch({ concurrency: 5 }));
 ```
 In the above case, 5 requests would be routed through express concurrently, and the response of each is placed in a queue to be streamed out to the client sequentially.
 

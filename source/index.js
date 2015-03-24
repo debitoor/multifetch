@@ -80,7 +80,6 @@ var create = function(options, prefetch) {
 		options = {};
 	}
 
-
 	options = options || {};
 	var ignore = options.ignore || [];
 	var headers = options.headers !== undefined ? options.headers : true;

@@ -239,9 +239,7 @@ describe('multifetch.options', function() {
 		});
 	});
 
-
 	describe('concurrent fetching', function() {
-
 		before(function(done) {
 			server = helper.server();
 
