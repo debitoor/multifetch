@@ -2,6 +2,7 @@ var url = require('url');
 
 var pump = require('pump');
 var extend = require('extend');
+var async = require('async');
 
 var JsonStream = require('./json');
 var NullifyStream = require('./nullify');
@@ -68,20 +69,26 @@ var fetchBare = function(request, response) {
 	return nullify;
 };
 
-var create = function(options, callback) {
-	if(!callback && typeof options === 'function') {
-		callback = options;
+var endStream = function (jsonStream, error) {
+	jsonStream.writeObject('_error', error);
+	jsonStream.end();
+};
+
+var create = function(options, prefetch) {
+	if(!prefetch && typeof options === 'function') {
+		prefetch = options;
 		options = {};
 	}
 
-	options = options || {};
 
+	options = options || {};
 	var ignore = options.ignore || [];
 	var headers = options.headers !== undefined ? options.headers : true;
+	var concurrency = options.concurrency || 1; // Defaults to sequential fetching
 
 	var fetch = headers ? fetchWithHeaders : fetchBare;
 
-	callback = callback || noopCallback;
+	prefetch = prefetch || noopCallback;
 
 	return function(request, response, next) {
 		var app = request.app;
@@ -95,41 +102,63 @@ var create = function(options, callback) {
 
 		pump(json, response);
 
-		(function loop() {
-			var key = keys.pop();
+		// Exit early if there is nothing to fetch.
+		if(keys.length === 0) {
+			return endStream(json, error);
+		}
 
-			if(!key) {
-				json.writeObject('_error', error);
-				return json.end();
-			}
-
-			var messages = createMessages(request, query[key]);
-
-			var write = function(prevent) {
-				if(prevent) {
-					return loop();
+		// The resource queue processes resource streams sequentially.
+		var resourceQueue = async.queue(function worker(task, callback) {
+			pump(task.resource, json.createObjectStream(task.key), function(err) {
+				if(err) {
+					json.destroy();
+					return callback(err);
 				}
+				if(!(/2\d\d/).test(task.response.statusCode)) {
+					error = true;
+				}
+				callback();
+			});
+		}, 1);
+
+		// Asynchronously fetch the resource for a key and push the resulting
+		// stream into the resource queue.
+		var fetchResource = function(key, callback) {
+			var messages = createMessages(request, query[key]);
+			prefetch(request, messages.request, function(prevent) {
+				if (prevent) return callback();
 
 				var resource = fetch(messages.request, messages.response);
+				var task = {
+					resource: resource,
+					request: messages.request,
+					response: messages.response,
+					key: key
+				};
 
-				pump(resource, json.createObjectStream(key), function(err) {
-					if(err) {
-						return json.destroy();
-					}
-					if(!(/2\d\d/).test(messages.response.statusCode)) {
-						error = true;
-					}
-
-					loop();
-				});
-
-				app(messages.request, messages.response, function(err) {
+				app(messages.request, messages.response, function() {
+					resourceQueue.kill();
 					json.destroy();
 				});
-			};
 
-			callback(request, messages.request, write);
-		}());
+				// Callback is called once the stream for this resource has
+				// been fully piped out to the client.
+				resourceQueue.push(task, callback);
+			});
+		};
+
+		// Fire off all requests and push the resulting streams into a queue to
+		// be processed
+		async.eachLimit(keys, concurrency, fetchResource, function(err) {
+			if(resourceQueue.idle()) {
+				endStream(json, error);
+			} else {
+				// Called once all streams have been fully pumped out to the client.
+				resourceQueue.drain = function() {
+					endStream(json, error);
+				};
+			}
+		});
 	};
 };
 
