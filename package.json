@@ -13,7 +13,7 @@
     "extend": "~2.0.0"
   },
   "devDependencies": {
-    "request": "~2.30.0",
+    "request": "~2.88.2",
     "express": "~4.10.1",
     "mocha": "~1.15.1",
     "chai": "~1.8.1",
