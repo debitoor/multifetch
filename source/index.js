@@ -50,7 +50,7 @@ var fetchWithHeaders = function(request, response) {
 		}
 
 		json.writeObject('statusCode', response.statusCode);
-		json.writeObject('headers', response._headers);
+		json.writeObject('headers', response.getHeaders() || {});
 		json.end();
 	});
 
