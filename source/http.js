@@ -95,7 +95,7 @@ Socket.prototype._write = function(data, encoding, callback) {
 		this.input._callback = callback;
 	}
 
-	this.bytesWritten += length(data, encoding);
+	this.bytesWritten += length(data);
 };
 
 Socket.prototype._read = function(size) {
